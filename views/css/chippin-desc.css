@@ -1,0 +1,45 @@
+.chippin-desc-wrapper { margin: 0 auto 20px; font: normal 13px/1.3 sans-serif; width: 1000px; }
+.chippin-desc-wrapper * { font-family: 'montrealts-regular', 'Helvetica Neue', Arial, Helvetica, sans-serif; }
+.chippin-desc-logo { float: left; padding: 0 30px 0 0; margin: 0 0 14px; border-right: 1px solid #eaeaea; }
+.chippin-desc-title { float: left; margin: 22px 0 14px 20px; }
+.chippin-desc-title span { white-space: nowrap; display: inline-block; font-size: 22px; }
+.chippin-desc-actions { float: right; white-space: nowrap; text-align: center; margin: 0 0 14px; }
+.chippin-desc-action-link {
+    display: inline-block;
+    cursor: pointer;
+    color: #fff;
+    font-size: 16px;
+    padding: 8px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    background-image :-o-linear-gradient(top, #27b0f0, #034dad);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #27b0f0),color-stop(0.6, #034dad));
+    background: -moz-linear-gradient(top center,#27b0f0,#034dad 60%);
+    background: -ms-linear-gradient(top center,#27b0f0,#034dad 60%);
+    background: linear-gradient(top center,#27b0f0,#034dad 60%);
+}
+.chippin-desc-actions a,
+.chippin-desc-actions a:hover,
+.chippin-desc-action-link:hover { color: #fff; }
+.chippin-desc-action-notice { margin: 6px 0 0; }
+.chippin-desc-content { clear: both; border: 2px solid #eaeaea; padding: 24px 0; zoom: 1; }
+.chippin-desc-content:after { content: ' '; display: table; clear: both; }
+.chippin-desc-col1, .chippin-desc-col2, .chippin-desc-col3 { float: left; padding: 0 1.5%; width: 32%; }
+.chippin-desc-content * { color: #0550aa; }
+.chippin-desc-subtitle { text-align: center; font-size: 22px; margin: 0 0 10px; }
+.chippin-desc-list { font-family: 'montrealts-xlight'; }
+.chippin-desc-list-item { background: url(../img/icon_item.png) no-repeat 0 1px; padding: 2px 0 10px 32px;list-style-type:none }
+.chippin-desc-list-alt .chippin-desc-list-item { background: url(../img/icon_item_alt.png) no-repeat 6px 3px; padding-left: 24px; }
+.chippin-desc-list-item .big { font-weight: bold; font-size: 120%; }
+.chippin-desc-list-item a { text-decoration: underline; }
+.chippin-desc-col1 .chippin-desc-list { padding-left: 120px; background: url(../img/icon_globe.png) no-repeat; font-size: 20px; }
+.chippin-desc-col1 .chippin-desc-list-item { background-position: 0 7px; padding-left: 24px; }
+.chippin-desc-hr { clear: both; height: 20px; overflow: hidden; border-bottom: 1px solid #eaeaea; margin: 0 20px 20px; }
+.chippin-desc-footer { zoom: 1; }
+.chippin-desc-footer:after { content: ' '; display: table; clear: both; }
+.chippin-desc-payment, .chippin-desc-start { float: left; padding: 0 1.5%; }
+.chippin-desc-payment { width: 63%; }
+.chippin-desc-payment .chippin-desc-subtitle { text-align: left; font-size: 16px; }
+.chippin-desc-start { width: 30%; }
+.chippin-desc-start a { text-decoration: none; }
+.chippin-desc-start a:hover { text-decoration: underline; }
