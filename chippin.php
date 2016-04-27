@@ -28,6 +28,16 @@ class Chippin extends PaymentModule {
 	protected $hooks = array(
 	);
 
+	private $os_statuses = array(
+		'CP_OS_WAITING' => array(
+			'name' => 'Awaiting Chippin',
+			'color' => '#4169E1'
+		),
+		'CP_OS_TIMED_OUT' => array(
+			'name' => 'Chippin Timed-out',
+			'color' => '#DC143C'
+		),
+	);
 	private $chippinMerchantId;
 	private $chippinMerchantSecret;
 	private $chippinDuration;
@@ -70,15 +80,6 @@ class Chippin extends PaymentModule {
 	}
 
 	/**
-	 * Chippin waiting status
-	 *
-	 * @var array
-	 */
-	private $os_statuses = array(
-		'CP_OS_WAITING' => 'Awaiting Chippin payment',
-	);
-
-	/**
 	 * install module, register hooks, set default config values
 	 *
 	 * @return bool
@@ -98,6 +99,32 @@ class Chippin extends PaymentModule {
 		return false;
 	}
 
+	/**
+     * Create a new order state
+     */
+    public function createOrderStates()
+    {
+    	foreach ($this->os_statuses as $key => $values) {
+
+	        if (!Configuration::get($key)) {
+	            $order_state = new OrderState();
+
+	            foreach (Language::getLanguages() as $language) {
+	                $order_state->name[$language['id_lang']] = $values['name'];
+	            }
+
+	            $order_state->send_email = false;
+	            $order_state->color = $values['color'];
+	            $order_state->hidden = false;
+	            $order_state->delivery = false;
+	            $order_state->logable = true;
+	            $order_state->invoice = true;
+
+	            $order_state->add();
+	            Configuration::updateValue($key, (int) $order_state->id);
+	        }
+    	}
+    }
 
 
 	/**
