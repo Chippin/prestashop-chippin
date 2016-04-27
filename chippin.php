@@ -64,7 +64,18 @@ class Chippin extends PaymentModule {
 		if (!Configuration::get('MYMODULE_NAME')) {
     		$this->warning = $this->l('No name provided.');
 		}
+
+		$this->setOrderCurrency();
 	}
+
+	/**
+	 * Chippin waiting status
+	 *
+	 * @var array
+	 */
+	private $os_statuses = array(
+		'CP_OS_WAITING' => 'Awaiting Chippin payment',
+	);
 
 	/**
 	 * install module, register hooks, set default config values
@@ -309,8 +320,24 @@ class Chippin extends PaymentModule {
 		file_put_contents($file, $string.' - '.date('Y-m-d H:i:s')."\n", FILE_APPEND | LOCK_EX);
 	}
 
-	public function generateHash($price_in_pence)
+	private function generateHash($price_in_pence)
 	{
-		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->secure_key . $price_in_pence . $this->chippinDuration . 'gbp', $this->chippinMerchantSecret);
+		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->secure_key . $price_in_pence . $this->chippinDuration . $this->getOrderCurrency(), $this->chippinMerchantSecret);
+	}
+
+	private function setOrderCurrency()
+	{
+		$currencies = Currency::getCurrencies();
+
+		foreach ($currencies as $key => $currency) {
+			if ($currency['id_currency'] == $this->context->cart->id_currency) {
+				$this->orderCurrency = $currency['iso_code'];
+			}
+		}
+	}
+
+	private function getOrderCurrency()
+	{
+		return $this->orderCurrency;
 	}
 }

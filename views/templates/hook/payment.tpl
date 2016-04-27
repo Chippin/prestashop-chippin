@@ -7,7 +7,7 @@
                 <input type="hidden" name="merchant_id" value="{$chippin_merchant_id}">
                 <input type="hidden" name="merchant_order_id" value="{$secure_key}">
                 <input type="hidden" name="duration" value="{$chippin_duration}">
-                <input type="hidden" name="currency_code" value="gbp">
+                <input type="hidden" name="currency_code" value="{$currency}">
                 <input type="hidden" name="hmac" value="{$chippin_hmac}">
                 <input type="hidden" name="total_amount" value="{$price_in_pence}">
 
