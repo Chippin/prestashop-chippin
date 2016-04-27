@@ -31,6 +31,7 @@ class Chippin extends PaymentModule {
 	private $chippinMerchantId;
 	private $chippinMerchantSecret;
 	private $chippinDuration;
+	private $orderCurrency;
 
 	/**
 	 * create module object
@@ -284,6 +285,7 @@ class Chippin extends PaymentModule {
 			'chippin_merchant_id' => $this->chippinMerchantId,
 			'chippin_duration' => $this->chippinDuration,
 			'secure_key' => $this->context->cart->secure_key,
+			'currency' => $this->getOrderCurrency(),
 		));
 
 		return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
