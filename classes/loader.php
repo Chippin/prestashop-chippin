@@ -24,34 +24,5 @@
  *  International Registered Trademark & Property of PrestaShop SA
  */
 
-/**
- * Class ChippinConfirmationModuleFrontController
- * Extends ModuleFrontController
- * @see ModuleFrontController
- */
-class ChippinCallbackModuleFrontController extends ModuleFrontController
-{
-    public function __construct()
-    {
-        parent::__construct();
-
-        // load chippin classes
-        require_once(dirname(__FILE__).'/../../classes/loader.php');
-    }
-
-    public function postProcess()
-    {
-        $chippin = new Chippin();
-
-        $payment_response = new PaymentResponse();
-        $payment_response->getPostData();
-
-        // if a valid response from chippin
-        if(ChippinValidator::isValidHmac($payment_response)) {
-
-        }
-
-        $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information.');
-        return $this->setTemplate('error.tpl');
-    }
-}
+require_once(dirname(__FILE__).'/PaymentResponse.php');
+require_once(dirname(__FILE__).'/ChippinValidator.php');
