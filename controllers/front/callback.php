@@ -31,6 +31,13 @@
  */
 class ChippinCallbackModuleFrontController extends ModuleFrontController
 {
+    /**
+     * flag allow use ssl for this controller
+     *
+     * @var bool
+     */
+    public $ssl = true;
+
     public function __construct()
     {
         parent::__construct();
@@ -49,6 +56,48 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
         // if a valid response from chippin
         if(ChippinValidator::isValidHmac($payment_response)) {
 
+            if($payment_response->getAction() === "invited") {
+
+                $cart = new Cart($payment_response->getMerchantOrderId());
+
+                // if ($cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active)
+                //     Tools::redirect('index.php?controller=order&step=1');
+
+                // // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
+                // $authorized = false;
+                // foreach (Module::getPaymentModules() as $module)
+                //     if ($module['name'] == 'cheque')
+                //     {
+                //         $authorized = true;
+                //         break;
+                //     }
+
+                // if (!$authorized)
+                //     die($this->module->l('This payment method is not available.', 'validation'));
+
+                $customer = new Customer($cart->id_customer);
+
+                // if (!Validate::isLoadedObject($customer))
+                //     Tools::redirect('index.php?controller=order&step=1');
+
+                $currency = $this->context->currency;
+
+                $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
+
+                $this->module->validateOrder(
+                    (int)$cart->id,
+                    Configuration::get('CP_OS_WAITING'),
+                    $total,
+                    $this->module->displayName,
+                    NULL,
+                    NULL,
+                    (int)$currency->id,
+                    false,
+                    $customer->secure_key
+                );
+
+                // Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+            }
         }
 
         $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information.');

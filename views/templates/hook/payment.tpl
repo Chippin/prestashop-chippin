@@ -5,7 +5,7 @@
             <form action="{$chippin_url|escape:'htmlall':'UTF-8'}" method="POST">
 
                 <input type="hidden" name="merchant_id" value="{$chippin_merchant_id}">
-                <input type="hidden" name="merchant_order_id" value="{$secure_key}">
+                <input type="hidden" name="merchant_order_id" value="{$cart_id}">
                 <input type="hidden" name="duration" value="{$chippin_duration}">
                 <input type="hidden" name="currency_code" value="{$currency}">
                 <input type="hidden" name="hmac" value="{$chippin_hmac}">

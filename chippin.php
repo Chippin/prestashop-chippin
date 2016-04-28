@@ -311,7 +311,7 @@ class Chippin extends PaymentModule {
 			'products' => $products,
 			'chippin_merchant_id' => $this->chippinMerchantId,
 			'chippin_duration' => $this->chippinDuration,
-			'secure_key' => $this->context->cart->secure_key,
+			'cart_id' => $this->context->cart->id,
 			'currency' => $this->getOrderCurrency(),
 		));
 
@@ -351,7 +351,7 @@ class Chippin extends PaymentModule {
 
 	private function generateHash($price_in_pence)
 	{
-		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->secure_key . $price_in_pence . $this->chippinDuration . $this->getOrderCurrency(), $this->chippinMerchantSecret);
+		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->id . $price_in_pence . $this->chippinDuration . $this->getOrderCurrency(), $this->chippinMerchantSecret);
 	}
 
 	private function setOrderCurrency()
