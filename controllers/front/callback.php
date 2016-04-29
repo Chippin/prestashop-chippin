@@ -56,9 +56,9 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
         // if a valid response from chippin
         if(ChippinValidator::isValidHmac($payment_response)) {
 
-            if($payment_response->getAction() === "invited") {
+            $cart = new Cart($payment_response->getMerchantOrderId());
 
-                $cart = new Cart($payment_response->getMerchantOrderId());
+            if($payment_response->getAction() === "invited") {
 
                 // if ($cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active)
                 //     Tools::redirect('index.php?controller=order&step=1');
@@ -84,6 +84,7 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
 
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
+                // create the order in the orders table
                 $this->module->validateOrder(
                     (int)$cart->id,
                     Configuration::get('CP_OS_WAITING'),
@@ -97,10 +98,23 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                 );
 
                 // Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+            } elseif($payment_response->getAction() === "timed_out") {
+
+                $order_id = Order::getOrderByCartId((int) ($cart->id));
+                $order = new Order($order_id);
+                $timed_out_status_id = Configuration::get('CP_OS_TIMED_OUT');
+
+                // update order in orders table and orders history
+                $order->setCurrentState($timed_out_status_id);
+
             }
+
+        } else {
+
+            $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information.');
+            return $this->setTemplate('error.tpl');
+
         }
 
-        $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information.');
-        return $this->setTemplate('error.tpl');
     }
 }
