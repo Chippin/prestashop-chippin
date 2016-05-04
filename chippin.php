@@ -18,7 +18,18 @@ class Chippin extends PaymentModule {
 	const CHECKOUT_URL = 'http://staging.chippin.co.uk/new';
 	const LOG_FILE = 'log/chippin.log';
 
-	private static $locally_supported = array('USD', 'EUR', 'GBP');
+	protected $_html = '';
+	protected $html = '';
+	private $chippinMerchantId;
+	private $chippinMerchantSecret;
+	private $chippinDuration;
+	private $orderCurrency;
+
+	private static $locally_supported = array(
+		'USD',
+		'EUR',
+		'GBP'
+	);
 
 	/**
 	 * hooks uses by module
@@ -26,28 +37,64 @@ class Chippin extends PaymentModule {
 	 * @var array
 	 */
 	protected $hooks = array(
+		'displayHeader',
+		'payment',
+		'paymentReturn',
+		'adminOrder',
+		'BackOfficeHeader',
+		'displayOrderConfirmation',
+		'actionObjectCurrencyUpdateBefore',
 	);
 
+	/**
+	 * Chippin waiting status
+	 *
+	 * @var array
+	 */
 	private $os_statuses = array(
-		'CP_OS_WAITING' => array(
-			'name' => 'Awaiting Chippin',
-			'color' => '#4169E1'
-		),
-		'CP_OS_TIMED_OUT' => array(
-			'name' => 'Chippin Timed-out',
-			'color' => '#DC143C'
-		),
+		'CP_OS_PAYMENT_INITIATED' => 'Chippin initiated',
 	);
-	private $chippinMerchantId;
-	private $chippinMerchantSecret;
-	private $chippinDuration;
-	private $orderCurrency;
+
+	/**
+	 * Status for orders with accepted payment
+	 *
+	 * @var array
+	 */
+	private $os_payment_green_statuses = array(
+		'CP_OS_PAYMENT_COMPLETED' => 'Chippin completed',
+	);
+
+	/**
+	 * Chippin error status
+	 *
+	 * @var array
+	 */
+	private $os_payment_red_statuses = array(
+		'CP_OS_PAYMENT_FAILED' => 'Chippin failed',
+		'CP_OS_PAYMENT_TIMED_OUT' => 'Chippin timed-out',
+		'CP_OS_PAYMENT_CANCELLED' => 'Chippin cancelled',
+		'CP_OS_PAYMENT_REJECTED' => 'Chippin rejected',
+	);
+
+	/**
+	 * module settings
+	 *
+	 * @var array
+	 */
+	protected $module_params = array(
+		'SANDBOX' => 0,
+		'MERCHANT_ID' => '',
+		'MERCHANT_SECRET' => '',
+		'DURATION' => 24,
+	);
 
 	/**
 	 * create module object
 	 */
 	public function __construct()
 	{
+		// $this->createOrderStates();
+
 		$this->name = 'chippin';
 		$this->tab = 'payments_gateways';
 		$this->version = '1.0.0';
@@ -66,17 +113,17 @@ class Chippin extends PaymentModule {
 
 		$this->chippinMerchantId = $this->getConfig('MERCHANT_ID');
 		$this->chippinMerchantSecret = $this->getConfig('MERCHANT_SECRET');
-
-		// $this->chippinDuration = Configuration::get('DURATION');
-		$this->chippinDuration = 72;
+		$this->chippinDuration = Configuration::get('DURATION');
 
 		$this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
 
-		if (!Configuration::get('MYMODULE_NAME')) {
-    		$this->warning = $this->l('No name provided.');
-		}
+		/**
+		 * THIS IS ALWAYS TEMPORARY!!!!!! DON'T PUSH ME
+		 */
+		$this->createChippinPaymentStatus($this->os_statuses, '#3333FF', '', false, false, '', false);
+		$this->createChippinPaymentStatus($this->os_payment_green_statuses, '#32cd32', 'payment', true, true, true, true);
+		$this->createChippinPaymentStatus($this->os_payment_red_statuses, '#ec2e15', 'payment_error', false, true, false, true);
 
-		$this->setOrderCurrency();
 	}
 
 	/**
@@ -86,6 +133,13 @@ class Chippin extends PaymentModule {
 	 */
 	public function install()
 	{
+		// set up configuration params in configuration table
+		foreach ($this->module_params as $param => $value) {
+			if (!self::setConfig($param, $value)) {
+				return false;
+			}
+		}
+
 		if (parent::install()) {
 			foreach ($this->hooks as $hook) {
 				if (!$this->registerHook($hook)) {
@@ -96,36 +150,18 @@ class Chippin extends PaymentModule {
 			return true;
 		}
 
+
+		//waiting payment status creation
+		$this->createChippinPaymentStatus($this->os_statuses, '#3333FF', '', false, false, '', false);
+
+		//validate green payment status creation
+		$this->createChippinPaymentStatus($this->os_payment_green_statuses, '#32cd32', 'payment', true, true, true, true);
+
+		//validate red payment status creation
+		$this->createChippinPaymentStatus($this->os_payment_red_statuses, '#ec2e15', 'payment_error', false, true, false, true);
+
 		return false;
 	}
-
-	/**
-     * Create a new order state
-     */
-    public function createOrderStates()
-    {
-    	foreach ($this->os_statuses as $key => $values) {
-
-	        if (!Configuration::get($key)) {
-	            $order_state = new OrderState();
-
-	            foreach (Language::getLanguages() as $language) {
-	                $order_state->name[$language['id_lang']] = $values['name'];
-	            }
-
-	            $order_state->send_email = false;
-	            $order_state->color = $values['color'];
-	            $order_state->hidden = false;
-	            $order_state->delivery = false;
-	            $order_state->logable = true;
-	            $order_state->invoice = true;
-
-	            $order_state->add();
-	            Configuration::updateValue($key, (int) $order_state->id);
-	        }
-    	}
-    }
-
 
 	/**
 	 * uninstall module
@@ -144,8 +180,6 @@ class Chippin extends PaymentModule {
 
 		return true;
 	}
-
-
 
 	/**
 	 * Return server path for file
@@ -238,11 +272,18 @@ class Chippin extends PaymentModule {
 					'prefix' => '<i class="icon icon-tag"></i>',
 				),
 				array(
-					'type' => 'password',
+					'type' => 'text',
 					'label' => $this->l('Secret'),
 					'name' => 'merchant_secret',
+					'size' => 32,
 					'prefix' => '<i class="icon icon-tag"></i>',
 					'desc' => $this->l('This string should be kept secret and is used for signing requests and validating responses.')
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Duration (in hours)'),
+					'name' => 'duration',
+					'prefix' => '<i class="icon icon-tag"></i>'
 				),
 			),
 		);
@@ -272,7 +313,7 @@ class Chippin extends PaymentModule {
 		$this->context->controller->addCSS(($this->_path).'views/css/front.css', 'all');
 	}
 
-	public function price_in_pence($price) {
+	private function price_in_pence($price) {
 		return (int) ($price * 100);
 	}
 
@@ -292,16 +333,12 @@ class Chippin extends PaymentModule {
 			$this->context->cart->getOrderTotal(true, Cart::BOTH)
 		);
 
-		//var_dump($this->context->cart);
-
-		var_dump($this->context->cart->getOrderTotal(true, Cart::BOTH));
-
-		var_dump($price_in_pence);
-
 		$products = $this->context->cart->getProducts();
 		foreach ($products as $key => $value) {
 			$products[$key]['price_in_pence'] = $this->price_in_pence($value['total_wt']);
 		}
+
+		$this->setOrderCurrency();
 
 		$this->smarty->assign(array(
 			'chippin_hmac' => $this->generateHash($price_in_pence),
@@ -310,12 +347,52 @@ class Chippin extends PaymentModule {
 			'price_in_pence' => $price_in_pence,
 			'products' => $products,
 			'chippin_merchant_id' => $this->chippinMerchantId,
-			'chippin_duration' => $this->chippinDuration,
+			'chippin_duration' => $this->getConfig('DURATION'),
 			'cart_id' => $this->context->cart->id,
 			'currency' => $this->getOrderCurrency(),
 		));
 
 		return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
+	}
+
+	public function hookDisplayOrderConfirmation()
+	{
+		if (!$this->active) {
+	        return null;
+	    }
+
+        var_dump("hookDisplayOrderConfirmation");
+	}
+
+	public function hookOrderConfirmation()
+	{
+		if (!$this->active) {
+	        return null;
+	    }
+
+		var_dump("hookOrderConfirmation");
+	}
+
+	public function hookPaymentReturn()
+	{
+	    if (!$this->active) {
+	        return null;
+	    }
+
+		var_dump("hook Payment Return for chippin from chippin file");
+	}
+
+	/**
+	 * Show view/do action on an individual Orders page.
+	 * This hook will change the page basically.
+	 */
+	public function hookAdminOrder()
+	{
+		if (!$this->active) {
+	        return null;
+	    }
+
+		var_dump("hook Payment Return for chippin from chippin file");
 	}
 
 	/**
@@ -331,6 +408,100 @@ class Chippin extends PaymentModule {
 		}
 
 		return self::CHECKOUT_URL;
+	}
+
+	/**
+	 * getContent method - needed to display "Configure" option in back-office
+	 * @return [type] [description]
+	 */
+	public function getContent()
+	{
+		// if (Tools::isSubmit('submit')) {
+		// 	Configuration::updateValue($this->name.'_message', Tools::getValue('our_message'));
+		// }
+
+		// $this->_displayForm();
+
+		// return $this->_html;
+
+		$this->postProcess();
+		$helper = $this->initForm();
+		foreach ($this->fields_form as $field_form)
+		{
+			foreach ($field_form['form']['input'] as $input)
+				$helper->fields_value[$input['name']] = $this->getConfig(Tools::strtoupper($input['name']));
+		}
+
+		$this->html .= $helper->generateForm($this->fields_form);
+
+		return $this->html;
+
+	}
+
+
+	/**
+	 * save configuration values
+	 */
+	protected function postProcess()
+	{
+		if (Tools::isSubmit('submitUpdate'))
+		{
+			$data = $_POST;
+			if (is_array($data))
+			{
+				foreach ($data as $key => $value)
+				{
+					if (in_array($key, array('sandbox_pswd', 'pswd')) && empty($value))
+						continue;
+
+					if ($key == 'use_bs_exchange')
+						if ($value && !$this->getConfig('USE_BS_EXCHANGE'))
+							$this->refreshCurrencies();
+						elseif (!$value && $this->getConfig('USE_BS_EXCHANGE'))
+							Currency::refreshCurrencies();
+
+						self::setConfig($key, $value);
+				}
+			}
+
+			Tools::redirectAdmin('index.php?tab=AdminModules&conf=4&configure='.$this->name.
+			'&token='.Tools::getAdminToken('AdminModules'.
+			(int)Tab::getIdFromClassName('AdminModules').(int)$this->context->employee->id));
+		}
+	}
+
+	public function hookBackOfficeTop()
+	{
+		var_dump("hookBackOfficeTop");
+		exit;
+	}
+
+	public function hookBackOfficeHeader()
+	{
+		var_dump("hookBackOfficeHeader");
+		// exit;
+	}
+
+	/**
+	 * _displayForm method - needed to display "Configure" option in back-office
+	 * @return [type] [description]
+	 */
+	private function _displayForm()
+	{
+		$this->_html .= '
+			<form action="'.$_SERVER['REQUEST_URI'].'" method="post">
+			<label>'.$this->l('Message to the world').'</label>
+			<div class="margin-form">
+			<input type="text" name="our_message" />
+			</div>
+			<input type="submit" name="submit" value="'.$this->l('Update').'" class="button" />
+			</form>
+		';
+	}
+
+	public function getChippinMerchantSecret()
+	{
+		return $this->chippinMerchantSecret;
 	}
 
 	/**
@@ -351,7 +522,7 @@ class Chippin extends PaymentModule {
 
 	private function generateHash($price_in_pence)
 	{
-		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->id . $price_in_pence . $this->chippinDuration . $this->getOrderCurrency(), $this->chippinMerchantSecret);
+		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->id . $price_in_pence . $this->getConfig('DURATION') . $this->getOrderCurrency(), $this->chippinMerchantSecret);
 	}
 
 	private function setOrderCurrency()
@@ -368,5 +539,54 @@ class Chippin extends PaymentModule {
 	private function getOrderCurrency()
 	{
 		return $this->orderCurrency;
+	}
+
+	/**
+	 * create new order statuses
+	 *
+	 * @param $array
+	 * @param $color
+	 * @param $template
+	 * @param $invoice
+	 * @param $send_email
+	 * @param $paid
+	 * @param $logable
+	 */
+	private function createChippinPaymentStatus($array, $color, $template, $invoice, $send_email, $paid, $logable)
+	{
+		foreach ($array as $key => $value)
+		{
+			$ow_status = Configuration::get($key);
+			if ($ow_status === false) {
+				$order_state = new OrderState();
+			} else {
+				$order_state = new OrderState((int)$ow_status);
+			}
+
+			$langs = Language::getLanguages();
+
+			foreach ($langs as $lang) {
+				$order_state->name[$lang['id_lang']] = utf8_encode(html_entity_decode($value));
+			}
+
+			$order_state->invoice = $invoice;
+			$order_state->send_email = $send_email;
+
+			if ($template != '') {
+				$order_state->template = $template;
+			}
+
+			if ($paid != '') {
+				$order_state->paid = $paid;
+			}
+
+			$order_state->logable = $logable;
+			$order_state->color = $color;
+			$order_state->save();
+
+			Configuration::updateValue($key, (int)$order_state->id);
+
+			Tools::copy(dirname(__FILE__).'/views/img/statuses/'.$key.'.gif', _PS_ROOT_DIR_.'/img/os/'.(int)$order_state->id.'.gif');
+		}
 	}
 }
