@@ -25,18 +25,15 @@
  */
 
 /**
- * Class PaymentResponse
+ * Class PaymentResponseChippin
  * Extends Response
  * @see Response
  */
-class PaymentResponse
+class PaymentResponseChippin
 {
     private $merchant_order_id;
-
     private $hmac;
-
     private $action;
-
     private $param_list;
 
     /**
@@ -46,61 +43,6 @@ class PaymentResponse
     {
         return $this->errors;
     }
-
-    /**
-     * This method compares the Sign string sent by Alipay's response with a Sign string generated with local values
-     * @return bool
-     */
-    // public function compareSign()
-    // {
-    //     require_once(dirname(__FILE__).'/alipay.api.php');
-    //     $default_config = array(
-    //         'partner_id' => false,
-    //         'service' => false
-    //     );
-    //     $credentials = AlipayTools::getCredentials(false, $default_config);
-    //     $alipayapi = new AlipayApi($credentials);
-    //     $generated_string = $alipayapi->getResponseSign($this);
-    //     if ($this->sign != $generated_string) {
-    //         return false;
-    //     }
-    //     return true;
-    // }
-
-    /**
-     * This method checks data integrity
-     * @param bool $response
-     * @param bool $params
-     * @return bool
-     */
-    // public function processResponse($response = true, $params = true)
-    // {
-    //     $alipay = new Alipay();
-    //     if (!$response || !$params) {
-    //         $this->errors[] = $alipay->l('An error occured. Please contact the merchant to have more informations');
-    //         return false;
-    //     }
-    //     $cart = new Cart((int)$this->id_cart);
-    //     if (!Validate::isLoadedObject($cart)) {
-    //         $this->errors[] = $alipay->l('Cannot load Cart object.');
-    //         return false;
-    //     }
-    //     $customer = new Customer((int)$cart->id_customer);
-    //     if (!Validate::isLoadedObject($customer)) {
-    //         $this->errors[] = $alipay->l('Cannot load Customer object.');
-    //         return false;
-    //     }
-    //     if ($customer->secure_key != $this->secure_key || !$this->compareSign()) {
-    //         $this->errors[] = $alipay->l('An error occured. Please contact the merchant to have more informations');
-    //         return false;
-    //     }
-    //     $this->tplVars = array(
-    //         'id_cart'       => $this->id_cart,
-    //         'id_module'     => $this->id_module,
-    //         'secure_key'    => $this->secure_key
-    //     );
-    //     return true;
-    // }
 
     /**
      * @return mixed
@@ -159,7 +101,7 @@ class PaymentResponse
     }
 
     /**
-     * This method sets the PaymentResponse object parameters with the Post values
+     * This method sets the PaymentResponseChippin object parameters with the Post values
      */
     public function getPostData()
     {

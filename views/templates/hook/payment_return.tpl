@@ -36,10 +36,6 @@
 		<br /><br /> <strong>{l s='Your order will be sent as soon as we receive payment.' mod='chippin'}</strong>
 		<br /><br />{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.
 	</p>
-{elseif $status == 'initiated'}
-	<p class="warning">
-		{l s='Thanks for contributing!' mod='chippin'}
-	</p>
 {else}
 	<p class="warning">
 		{l s='We noticed a problem with your order. If you think this is an error, feel free to contact our' mod='chippin'}

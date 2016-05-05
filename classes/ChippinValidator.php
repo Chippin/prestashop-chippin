@@ -41,7 +41,7 @@ class ChippinValidator
         return Configuration::get(Tools::strtoupper(self::PREFIX.$name));
     }
 
-    public static function isValidHmac(PaymentResponse $paymentResponse)
+    public static function isValidHmac(PaymentResponseChippin $paymentResponse)
     {
         self::$chippinMerchantId = self::getConfig('MERCHANT_ID');
         self::$chippinMerchantSecret = self::getConfig('MERCHANT_SECRET');

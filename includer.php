@@ -7,5 +7,4 @@ if (!defined('_PS_VERSION_') || (is_object(Context::getContext()->customer) && !
 	exit;
 
 require_once _PS_MODULE_DIR_.'chippin/chippin.php';
-require_once _PS_MODULE_DIR_.'chippin/classes/ChippinOrder.php';
 require_once _PS_MODULE_DIR_.'chippin/classes/loader.php';
