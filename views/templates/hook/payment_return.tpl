@@ -24,17 +24,17 @@
 *}
 
 {if $status == 'completed'}
-<p>{l s='Your order on %s is complete.' sprintf=$shop_name mod='chippin'}
-		<br /><br />
-		{l s='Please send us a bank wire with' mod='chippin'}
-		<br /><br />- {l s='Amount' mod='chippin'} <span class="price"><strong>{$total_to_pay}</strong></span>
-		{if !isset($reference)}
-			<br /><br />- {l s='Do not forget to insert your order number #%d in the subject of your bank wire.' sprintf=$id_order mod='chippin'}
-		{else}
-			<br /><br />- {l s='Do not forget to insert your order reference %s in the subject of your bank wire.' sprintf=$reference mod='chippin'}
-		{/if}		<br /><br />{l s='An email has been sent with this information.' mod='chippin'}
-		<br /><br /> <strong>{l s='Your order will be sent as soon as we receive payment.' mod='chippin'}</strong>
-		<br /><br />{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.
+	<p>
+		{l s='Your order on %s is complete.' sprintf=$shop_name mod='chippin'}
+		{l s='Amount' mod='chippin'} <span class="price"><strong>{$total_to_pay}</strong></span>
+
+		{if isset($reference)}
+			<p>{l s='Your order reference is: %s.' sprintf=$reference mod='chippin'}</p>
+		{/if}
+
+		<p>{l s='An email has been sent with this information.' mod='chippin'}</p>
+		<p><strong>{l s='Your order will be sent as soon as we receive payment.' mod='chippin'}</strong></p>
+		<p>{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.</p>
 	</p>
 {else}
 	<p class="warning">
