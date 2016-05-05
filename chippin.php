@@ -1,7 +1,8 @@
 <?php
 
-if (!defined('_PS_VERSION_'))
+if (!defined('_PS_VERSION_')) {
 	exit;
+}
 
 require_once _PS_MODULE_DIR_.'chippin/includer.php';
 
@@ -93,8 +94,6 @@ class Chippin extends PaymentModule {
 	 */
 	public function __construct()
 	{
-		// $this->createOrderStates();
-
 		$this->name = 'chippin';
 		$this->tab = 'payments_gateways';
 		$this->version = '1.0.0';
@@ -248,7 +247,7 @@ class Chippin extends PaymentModule {
 		$this->fields_form[0]['form'] = array(
 			'tinymce' => true,
 			'legend' => array('title' => $this->l('Chippin Credentials'), 'image' => $this->_path.
-				'logo.gif'),
+				'logo_1.png'),
 			'submit' => array(
 				'name' => 'submitUpdate',
 				'title' => $this->l('   Save   ')
@@ -334,6 +333,7 @@ class Chippin extends PaymentModule {
 		);
 
 		$products = $this->context->cart->getProducts();
+
 		foreach ($products as $key => $value) {
 			$products[$key]['price_in_pence'] = $this->price_in_pence($value['total_wt']);
 		}
@@ -360,8 +360,6 @@ class Chippin extends PaymentModule {
 		if (!$this->active) {
 	        return null;
 	    }
-
-        var_dump("hookDisplayOrderConfirmation");
 	}
 
 	public function hookOrderConfirmation()
@@ -369,17 +367,30 @@ class Chippin extends PaymentModule {
 		if (!$this->active) {
 	        return null;
 	    }
-
-		var_dump("hookOrderConfirmation");
 	}
 
-	public function hookPaymentReturn()
+	public function hookPaymentReturn($params)
 	{
 	    if (!$this->active) {
-	        return null;
+	        return;
 	    }
 
-		var_dump("hook Payment Return for chippin from chippin file");
+		$state = $params['objOrder']->getCurrentState();
+
+		if (in_array($state, array(Configuration::get('CP_OS_PAYMENT_COMPLETED')))) {
+			$this->smarty->assign(array(
+				'total_to_pay' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
+				'status' => 'completed',
+				'id_order' => $params['objOrder']->id
+			));
+			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference)) {
+				$this->smarty->assign('reference', $params['objOrder']->reference);
+			}
+		} else {
+			$this->smarty->assign('status', 'failed');
+		}
+
+		return $this->display(__FILE__, 'payment_return.tpl');
 	}
 
 	/**
@@ -391,8 +402,6 @@ class Chippin extends PaymentModule {
 		if (!$this->active) {
 	        return null;
 	    }
-
-		var_dump("hook Payment Return for chippin from chippin file");
 	}
 
 	/**
@@ -416,20 +425,14 @@ class Chippin extends PaymentModule {
 	 */
 	public function getContent()
 	{
-		// if (Tools::isSubmit('submit')) {
-		// 	Configuration::updateValue($this->name.'_message', Tools::getValue('our_message'));
-		// }
-
-		// $this->_displayForm();
-
-		// return $this->_html;
-
 		$this->postProcess();
+
 		$helper = $this->initForm();
-		foreach ($this->fields_form as $field_form)
-		{
-			foreach ($field_form['form']['input'] as $input)
+
+		foreach ($this->fields_form as $field_form) {
+			foreach ($field_form['form']['input'] as $input) {
 				$helper->fields_value[$input['name']] = $this->getConfig(Tools::strtoupper($input['name']));
+			}
 		}
 
 		$this->html .= $helper->generateForm($this->fields_form);
@@ -437,7 +440,6 @@ class Chippin extends PaymentModule {
 		return $this->html;
 
 	}
-
 
 	/**
 	 * save configuration values
@@ -451,16 +453,7 @@ class Chippin extends PaymentModule {
 			{
 				foreach ($data as $key => $value)
 				{
-					if (in_array($key, array('sandbox_pswd', 'pswd')) && empty($value))
-						continue;
-
-					if ($key == 'use_bs_exchange')
-						if ($value && !$this->getConfig('USE_BS_EXCHANGE'))
-							$this->refreshCurrencies();
-						elseif (!$value && $this->getConfig('USE_BS_EXCHANGE'))
-							Currency::refreshCurrencies();
-
-						self::setConfig($key, $value);
+					self::setConfig($key, $value);
 				}
 			}
 
@@ -486,18 +479,18 @@ class Chippin extends PaymentModule {
 	 * _displayForm method - needed to display "Configure" option in back-office
 	 * @return [type] [description]
 	 */
-	private function _displayForm()
-	{
-		$this->_html .= '
-			<form action="'.$_SERVER['REQUEST_URI'].'" method="post">
-			<label>'.$this->l('Message to the world').'</label>
-			<div class="margin-form">
-			<input type="text" name="our_message" />
-			</div>
-			<input type="submit" name="submit" value="'.$this->l('Update').'" class="button" />
-			</form>
-		';
-	}
+	// private function _displayForm()
+	// {
+	// 	$this->_html .= '
+	// 		<form action="'.$_SERVER['REQUEST_URI'].'" method="post">
+	// 		<label>'.$this->l('Message to the world').'</label>
+	// 		<div class="margin-form">
+	// 		<input type="text" name="our_message" />
+	// 		</div>
+	// 		<input type="submit" name="submit" value="'.$this->l('Update').'" class="button" />
+	// 		</form>
+	// 	';
+	// }
 
 	public function getChippinMerchantSecret()
 	{
