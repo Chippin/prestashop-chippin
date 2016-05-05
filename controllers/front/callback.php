@@ -49,171 +49,77 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
     public function postProcess()
     {
         $chippin = new Chippin();
-
-        $payment_response = new PaymentResponse();
+        $payment_response = new PaymentResponseChippin();
         $payment_response->getPostData();
 
         // if a valid response from chippin
         if(ChippinValidator::isValidHmac($payment_response)) {
 
-            if($payment_response->getAction() === "invited") {
+            if ($payment_response->getAction() === "completed" || $payment_response->getAction() === "invited" || $payment_response->getAction() === "contributed") {
 
                 $cart = new Cart($payment_response->getMerchantOrderId());
-
                 $customer = new Customer($cart->id_customer);
 
                 if (!Validate::isLoadedObject($customer)) {
-                    Chippin::log('Error - Not a valid Customer');
                     die();
                 }
 
                 $currency = $this->context->currency;
-
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
-                // create the order in the orders table
-                $this->module->validateOrder(
-                    (int) $cart->id,
-                    Configuration::get('CP_OS_PAYMENT_INITIATED'),
-                    $total,
-                    $this->module->displayName,
-                    NULL,
-                    NULL,
-                    (int)$currency->id,
-                    false,
-                    $customer->secure_key
-                );
+                if ($payment_response->getAction() === "invited") {
 
-            } elseif ($payment_response->getAction() === "timed_out") {
+                    $this->module->validateOrder(
+                        (int) $cart->id,
+                        Configuration::get('CP_OS_PAYMENT_INITIATED'),
+                        $total,
+                        $this->module->displayName,
+                        NULL,
+                        NULL,
+                        (int)$currency->id,
+                        false,
+                        $customer->secure_key
+                    );
 
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
-                $timed_out_status_id = Configuration::get('CP_OS_PAYMENT_TIMED_OUT');
+                } elseif ($payment_response->getAction() === "completed") {
 
-                // update order in orders table and orders history
-                $order->setCurrentState($timed_out_status_id);
+                    $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                    $order = new Order($order_id);
+                    $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
 
-            } elseif ($payment_response->getAction() === "cancelled") {
+                    Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$order->id.'&key='.$customer->secure_key);
 
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
+                } elseif ($payment_response->getAction() === "contributed") {
 
-                // update order in orders table and orders history
-                $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_CANCELLED'));
+                    $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                    $order = new Order($order_id);
 
-                $this->errors[] = $chippin->l('Your Chippin payment has been cancelled. Please contact the store owner for more information.');
-                return $this->setTemplate('error.tpl');
+                    $this->context->smarty->assign(array(
+                        'order' => $order,
+                        'products' => $cart->getProducts(),
+                    ));
 
-            } elseif ($payment_response->getAction() === "completed") {
+                    return $this->setTemplate('contributed.tpl');
+                }
 
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
-                $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
-
-                $this->context->smarty->assign(
-                    array(
-                        'is_guest' => (($this->context->customer->is_guest) || $this->context->customer->id == false),
-                        'order' => $order->reference,
-                        // 'price' => Tools::displayPrice($price, $this->context->currency->id),
-                        // 'HOOK_ORDER_CONFIRMATION' => $this->displayOrderConfirmation(),
-                        // 'HOOK_PAYMENT_RETURN' => $this->displayPaymentReturn(),
-                    )
-                );
-
-                $this->setTemplate('confirmation.tpl');
-
-            } elseif ($payment_response->getAction() === "contributed") {
+            } elseif ($payment_response->getAction() === "cancelled" || $payment_response->getAction() === "failed" || $payment_response->getAction() === "rejected" || $payment_response->getAction() === "timed_out") {
 
                 $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
                 $order = new Order($order_id);
+                $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
 
-                $this->context->smarty->assign(
-                    array(
-                        'is_guest' => (($this->context->customer->is_guest) || $this->context->customer->id == false),
-                        'order' => $order->reference,
-                        // 'price' => Tools::displayPrice($price, $this->context->currency->id),
-                        // 'HOOK_ORDER_CONFIRMATION' => $this->displayOrderConfirmation(),
-                        // 'HOOK_PAYMENT_RETURN' => $this->displayPaymentReturn(),
-                    )
-                );
+                $order->setCurrentState(Configuration::get($action));
 
-                $this->setTemplate('contributed.tpl');
-
-            } elseif ($payment_response->getAction() === "failed") {
-
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
-                $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_FAILED'));
-
-                $this->errors[] = $chippin->l('Your Chippin payment has failed. Please contact the store owner for more information.');
-                return $this->setTemplate('error.tpl');
-
-            } elseif ($payment_response->getAction() === "rejected") {
-
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
-                $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_REJECTED'));
-
-                $this->errors[] = $chippin->l('Your Chippin payment was reject. Please contact the store owner for more information.');
-                return $this->setTemplate('error.tpl');
+                if($payment_response->getAction() !== "timed_out") {
+                    $this->errors[] = $chippin->l('Chippin payment status: ' . $payment_response->getAction() . '. Please contact the store owner for more information');
+                    return $this->setTemplate('error.tpl');
+                }
             }
 
         } else {
-
-            $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information.');
+            $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
             return $this->setTemplate('error.tpl');
         }
     }
 
-    private function displayHook()
-    {
-        $payment_response = new PaymentResponse();
-        $payment_response->getPostData();
-
-        if (Validate::isUnsignedId($payment_response->getMerchantOrderId()) && Validate::isUnsignedId(72)) {
-            $order = new Order((int) $payment_response->getMerchantOrderId());
-            $currency = new Currency((int) $order->id_currency);
-
-            if (Validate::isLoadedObject($order)) {
-                $params = array();
-                $params['objOrder'] = $order;
-                $params['currencyObj'] = $currency;
-                $params['currency'] = $currency->sign;
-                $params['total_to_pay'] = $order->getOrdersTotalPaid();
-
-                return $params;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Execute the hook displayPaymentReturn
-     */
-    public function displayPaymentReturn()
-    {
-
-        $params = $this->displayHook();
-
-        if ($params && is_array($params)) {
-            return Hook::exec('displayPaymentReturn', $params, (int) $this->module->id);
-        }
-
-        return false;
-    }
-
-    /**
-     * Execute the hook displayOrderConfirmation
-     */
-    public function displayOrderConfirmation()
-    {
-        $params = $this->displayHook();
-
-        if ($params && is_array($params)) {
-            return Hook::exec('displayOrderConfirmation', $params);
-        }
-
-        return false;
-    }
 }
