@@ -35,6 +35,9 @@ class PaymentResponseChippin
     private $hmac;
     private $action;
     private $param_list;
+    private $email;
+    private $first_name;
+    private $last_name;
 
     /**
      * @return mixed
@@ -95,6 +98,54 @@ class PaymentResponseChippin
     /**
      * @return mixed
      */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param mixed $action
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirstName()
+    {
+        return $this->first_name;
+    }
+
+    /**
+     * @param mixed $action
+     */
+    public function setFirstName($first_name)
+    {
+        $this->first_name = $first_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastName()
+    {
+        return $this->last_name;
+    }
+
+    /**
+     * @param mixed $action
+     */
+    public function setLastName($last_name)
+    {
+        $this->last_name = $last_name;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getParamList()
     {
         return $this->param_list;
@@ -108,5 +159,8 @@ class PaymentResponseChippin
         $this->setMerchantOrderId(Tools::getValue('merchant_order_id'));
         $this->setHmac(Tools::getValue('hmac'));
         $this->setAction(Tools::getValue('action'));
+        $this->setEmail(Tools::getValue('email'));
+        $this->setFirstName(Tools::getValue('first_name'));
+        $this->setLastName(Tools::getValue('last_name'));
     }
 }
