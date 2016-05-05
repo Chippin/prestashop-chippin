@@ -19,6 +19,7 @@ class Chippin extends PaymentModule {
 	const CHECKOUT_URL = 'http://staging.chippin.co.uk/new';
 	const LOG_FILE = 'log/chippin.log';
 
+	protected $_postErrors = array();
 	protected $_html = '';
 	protected $html = '';
 	private $chippinMerchantId;
@@ -425,6 +426,7 @@ class Chippin extends PaymentModule {
 	 */
 	public function getContent()
 	{
+		// do the post stuff
 		$this->postProcess();
 
 		$helper = $this->initForm();
@@ -435,10 +437,19 @@ class Chippin extends PaymentModule {
 			}
 		}
 
-		$this->html .= $helper->generateForm($this->fields_form);
+		$this->_html .= $helper->generateForm($this->fields_form);
 
-		return $this->html;
+		return $this->_html;
+	}
 
+	protected function _postValidation()
+	{
+		if (Tools::isSubmit('submitUpdate'))
+		{
+			if ((int) Tools::getValue('duration') > 72) {
+				$this->_postErrors[] = $this->l('Duration maximum is 72 hours.');
+			}
+		}
 	}
 
 	/**
@@ -448,18 +459,23 @@ class Chippin extends PaymentModule {
 	{
 		if (Tools::isSubmit('submitUpdate'))
 		{
-			$data = $_POST;
-			if (is_array($data))
-			{
-				foreach ($data as $key => $value)
-				{
-					self::setConfig($key, $value);
+			$this->_postValidation();
+
+			if (!count($this->_postErrors)) {
+				$data = $_POST;
+				if (is_array($data)) {
+					foreach ($data as $key => $value) {
+						self::setConfig($key, $value);
+					}
+				}
+
+				Tools::redirectAdmin('index.php?tab=AdminModules&conf=4&configure='.$this->name.'&token='.Tools::getAdminToken('AdminModules'.(int)Tab::getIdFromClassName('AdminModules').(int)$this->context->employee->id));
+
+			} else {
+				foreach ($this->_postErrors as $err) {
+					$this->_html .= $this->displayError($err);
 				}
 			}
-
-			Tools::redirectAdmin('index.php?tab=AdminModules&conf=4&configure='.$this->name.
-			'&token='.Tools::getAdminToken('AdminModules'.
-			(int)Tab::getIdFromClassName('AdminModules').(int)$this->context->employee->id));
 		}
 	}
 
@@ -474,23 +490,6 @@ class Chippin extends PaymentModule {
 		var_dump("hookBackOfficeHeader");
 		// exit;
 	}
-
-	/**
-	 * _displayForm method - needed to display "Configure" option in back-office
-	 * @return [type] [description]
-	 */
-	// private function _displayForm()
-	// {
-	// 	$this->_html .= '
-	// 		<form action="'.$_SERVER['REQUEST_URI'].'" method="post">
-	// 		<label>'.$this->l('Message to the world').'</label>
-	// 		<div class="margin-form">
-	// 		<input type="text" name="our_message" />
-	// 		</div>
-	// 		<input type="submit" name="submit" value="'.$this->l('Update').'" class="button" />
-	// 		</form>
-	// 	';
-	// }
 
 	public function getChippinMerchantSecret()
 	{
