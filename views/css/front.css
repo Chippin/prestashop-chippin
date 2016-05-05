@@ -106,7 +106,7 @@ div#chippin_payment_module {
     margin-bottom: 10px;
 }
 
-div#chippin_payment_module a {
+div#chippin_payment_module {
     display: block;
     border: 1px solid #d6d4d4;
     -webkit-border-radius: 4px;
@@ -120,18 +120,12 @@ div#chippin_payment_module a {
     letter-spacing: -1px;
     position: relative;
     background-color: #fbfbfb;
+    height: 100px;
+    background: url('../img/logo.png') left no-repeat #FBFBFB;
 }
 
-div#chippin_payment_module a.chippin:after {
-    display: block;
-    content: "\f054";
-    position: absolute;
-    right: 15px;
-    margin-top: -11px;
-    top: 50%;
-    font-family: "FontAwesome";
-    font-size: 25px;
-    height: 22px;
-    width: 14px;
-    color: #777777;
+.chippin_span {
+    margin-left: 300px;
+    float: right;
+    margin-top: 25px;
 }

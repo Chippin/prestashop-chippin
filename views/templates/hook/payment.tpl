@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-xs-12 col-md-12">
-        <p class="payment_module" id="chippin_payment_button">
+        <div class="payment_module" id="chippin_payment_module">
 
             <form action="{$chippin_url|escape:'htmlall':'UTF-8'}" method="POST">
 
@@ -21,10 +21,16 @@
                 <input type="hidden" name="last_name" id="last_name" value="{$cookie->customer_lastname}">
                 <input type="hidden" name="email" id="email" value="{$cookie->email}">
 
-                <p><input type="submit" value="Pay with Chippin"></p>
+                <div class="chippin_span">
+                    <span class="label_en">
+                        {l s='Pay with Chippin' mod='chippin'}<br />
+                    </span>
+                    <span>
+                        <input type="submit" value="Go to Chippin">
+                    </span>
+                </div>
 
             </form>
-
-        </p>
+        </div>
     </div>
 </div>
