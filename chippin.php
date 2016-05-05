@@ -21,7 +21,7 @@ class Chippin extends PaymentModule {
 
 	protected $_postErrors = array();
 	protected $_html = '';
-	protected $html = '';
+
 	private $chippinMerchantId;
 	private $chippinMerchantSecret;
 	private $chippinDuration;
@@ -116,14 +116,6 @@ class Chippin extends PaymentModule {
 		$this->chippinDuration = Configuration::get('DURATION');
 
 		$this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-
-		/**
-		 * THIS IS ALWAYS TEMPORARY!!!!!! DON'T PUSH ME
-		 */
-		$this->createChippinPaymentStatus($this->os_statuses, '#3333FF', '', false, false, '', false);
-		$this->createChippinPaymentStatus($this->os_payment_green_statuses, '#32cd32', 'payment', true, true, true, true);
-		$this->createChippinPaymentStatus($this->os_payment_red_statuses, '#ec2e15', 'payment_error', false, true, false, true);
-
 	}
 
 	/**
@@ -150,14 +142,8 @@ class Chippin extends PaymentModule {
 			return true;
 		}
 
-
-		//waiting payment status creation
 		$this->createChippinPaymentStatus($this->os_statuses, '#3333FF', '', false, false, '', false);
-
-		//validate green payment status creation
 		$this->createChippinPaymentStatus($this->os_payment_green_statuses, '#32cd32', 'payment', true, true, true, true);
-
-		//validate red payment status creation
 		$this->createChippinPaymentStatus($this->os_payment_red_statuses, '#ec2e15', 'payment_error', false, true, false, true);
 
 		return false;
@@ -426,7 +412,6 @@ class Chippin extends PaymentModule {
 	 */
 	public function getContent()
 	{
-		// do the post stuff
 		$this->postProcess();
 
 		$helper = $this->initForm();
@@ -481,14 +466,16 @@ class Chippin extends PaymentModule {
 
 	public function hookBackOfficeTop()
 	{
-		var_dump("hookBackOfficeTop");
-		exit;
+		if (!$this->active) {
+	        return null;
+	    }
 	}
 
 	public function hookBackOfficeHeader()
 	{
-		var_dump("hookBackOfficeHeader");
-		// exit;
+		if (!$this->active) {
+	        return null;
+	    }
 	}
 
 	public function getChippinMerchantSecret()
