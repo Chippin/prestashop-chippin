@@ -296,7 +296,9 @@ class Chippin extends PaymentModule {
 	 */
 	public function hookHeader()
 	{
-		$this->context->controller->addCSS(($this->_path).'views/css/front.css', 'all');
+		if (!$this->active) {
+			return;
+		}
 	}
 
 	private function price_in_pence($price) {
@@ -338,6 +340,8 @@ class Chippin extends PaymentModule {
 			'cart_id' => $this->context->cart->id,
 			'currency' => $this->getOrderCurrency(),
 		));
+
+		$this->context->controller->addCSS(($this->_path).'views/css/front.css', 'all');
 
 		return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
 	}
