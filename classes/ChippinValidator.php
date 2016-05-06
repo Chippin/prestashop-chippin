@@ -31,31 +31,18 @@
  */
 class ChippinValidator
 {
-    const PREFIX = 'CHIPPIN_';
-
-    private static $chippinMerchantId;
-    private static $chippinMerchantSecret;
-
-    public static function getConfig($name)
-    {
-        return Configuration::get(Tools::strtoupper(self::PREFIX.$name));
-    }
-
     public static function isValidHmac(PaymentResponseChippin $paymentResponse)
     {
-        self::$chippinMerchantId = self::getConfig('MERCHANT_ID');
-        self::$chippinMerchantSecret = self::getConfig('MERCHANT_SECRET');
         $hash = "";
 
         if($paymentResponse->getAction() !== "contributed") {
 
-            $hash = hash_hmac('sha256', $paymentResponse->getAction() . self::$chippinMerchantId . $paymentResponse->getMerchantOrderId(), self::$chippinMerchantSecret);
+            $hash = hash_hmac('sha256', $paymentResponse->getAction() . Chippin::getConfig('MERCHANT_ID') . $paymentResponse->getMerchantOrderId(), Chippin::getConfig('MERCHANT_SECRET'));
 
         } elseif ($paymentResponse->getAction() === "contributed") {
 
-            $hash = hash_hmac('sha256', $paymentResponse->getAction() . self::$chippinMerchantId . $paymentResponse->getMerchantOrderId() . $paymentResponse->getFirstName() .
-            $paymentResponse->getLastName() . $paymentResponse->getEmail(), self::$chippinMerchantSecret);
-
+            $hash = hash_hmac('sha256', $paymentResponse->getAction() . Chippin::getConfig('MERCHANT_ID') . $paymentResponse->getMerchantOrderId() . $paymentResponse->getFirstName() .
+            $paymentResponse->getLastName() . $paymentResponse->getEmail(), Chippin::getConfig('MERCHANT_SECRET'));
         }
 
         if($hash === $paymentResponse->getHmac()) {
@@ -63,5 +50,10 @@ class ChippinValidator
         }
 
         return false;
+    }
+
+    public static function generateHash($price_in_pence, $orderCurrency, $cartId)
+    {
+        return hash_hmac('sha256', Chippin::getConfig('MERCHANT_ID') . $cartId . $price_in_pence . Chippin::getConfig('DURATION') . $orderCurrency, Chippin::getConfig('MERCHANT_SECRET'));
     }
 }

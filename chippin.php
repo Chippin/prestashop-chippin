@@ -328,7 +328,7 @@ class Chippin extends PaymentModule {
 		$this->setOrderCurrency();
 
 		$this->smarty->assign(array(
-			'chippin_hmac' => $this->generateHash($price_in_pence),
+			'chippin_hmac' => ChippinValidator::generateHash($price_in_pence, $this->getOrderCurrency(), $this->context->cart->id),
 			'chippin_url' => $this->getCheckoutUrl(),
 			'chippin_path' => $this->_path,
 			'price_in_pence' => $price_in_pence,
@@ -497,11 +497,6 @@ class Chippin extends PaymentModule {
 
 		$file = dirname(__FILE__).DS.$file;
 		file_put_contents($file, $string.' - '.date('Y-m-d H:i:s')."\n", FILE_APPEND | LOCK_EX);
-	}
-
-	private function generateHash($price_in_pence)
-	{
-		return hash_hmac('sha256', $this->chippinMerchantId . $this->context->cart->id . $price_in_pence . $this->getConfig('DURATION') . $this->getOrderCurrency(), $this->chippinMerchantSecret);
 	}
 
 	private function setOrderCurrency()
