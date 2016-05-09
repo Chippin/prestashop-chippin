@@ -24,18 +24,28 @@
 *}
 
 {if $status == 'completed'}
-	<p>
-		{l s='Your order on %s is complete.' sprintf=$shop_name mod='chippin'}
-		{l s='Amount' mod='chippin'} <span class="price"><strong>{$total_to_pay}</strong></span>
+	<img src="/modules/chippin/views/img/logo.png" alt="Chippin" width="150">
 
-		{if isset($reference)}
-			<p>{l s='Your order reference is: %s.' sprintf=$reference mod='chippin'}</p>
-		{/if}
+	<h3><strong>{l s='Your Chippin with %s is complete.' sprintf=$shop_name mod='chippin'}</strong></h3>
+	<h4>{l s='Your order will be sent as soon as we receive payment.' mod='chippin'}</h4>
 
-		<p>{l s='An email has been sent with this information.' mod='chippin'}</p>
-		<p><strong>{l s='Your order will be sent as soon as we receive payment.' mod='chippin'}</strong></p>
-		<p>{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.</p>
-	</p>
+	<p>{l s='An email has been sent with this information.' mod='chippin'}</p>
+	<p>{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.</p>
+
+	<h3 class="page-product-heading">Order details</h3>
+	<table class="table-data-sheet">
+		<tbody>
+			<tr class="odd">
+				<td>{l s='Amount' mod='chippin'}</td>
+				<td>{$total_to_pay}</td>
+			</tr>
+			<tr class="even">
+				<td>{l s='Order Reference' mod='chippin'}</td>
+				<td>{$reference}</td>
+			</tr>
+		</tbody>
+	</table>
+
 {else}
 	<p class="warning">
 		{l s='We noticed a problem with your order. If you think this is an error, feel free to contact our' mod='chippin'}
