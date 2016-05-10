@@ -17,6 +17,8 @@ class Chippin extends PaymentModule {
 	const PREFIX = 'CHIPPIN_';
 	const SANDBOX_CHECKOUT_URL = 'http://staging.chippin.co.uk/sandbox/new';
 	const CHECKOUT_URL = 'http://staging.chippin.co.uk/new';
+	const SANDBOX_CHIPPIN_ADMIN_URL = 'http://staging.chippin.co.uk/admin';
+	const CHIPPIN_ADMIN_URL = 'http://staging.chippin.co.uk/admin';
 	const LOG_FILE = 'log/chippin.log';
 
 	protected $_postErrors = array();
@@ -410,6 +412,15 @@ class Chippin extends PaymentModule {
 		return self::CHECKOUT_URL;
 	}
 
+	public function getChippinAdminUrl()
+	{
+		if ($this->getConfig('SANDBOX')) {
+			return self::SANDBOX_CHIPPIN_ADMIN_URL;
+		}
+
+		return self::CHIPPIN_ADMIN_URL;
+	}
+
 	/**
 	 * getContent method - needed to display "Configure" option in back-office
 	 * @return [type] [description]
@@ -426,9 +437,21 @@ class Chippin extends PaymentModule {
 			}
 		}
 
+		$this->_html .= $this->generateCallbackGuide();
+
 		$this->_html .= $helper->generateForm($this->fields_form);
 
 		return $this->_html;
+	}
+
+	private function generateCallbackGuide()
+	{
+		$this->smarty->assign(array(
+			'chippin_base_return_url' => _PS_BASE_URL_.'/index.php?fc=module&module=chippin&controller=callback&action=',
+			'chippin_admin_url' => $this->getChippinAdminUrl(),
+		));
+
+		return $this->display(__FILE__, $this->getTemplate('admin', 'callbacks.tpl'));
 	}
 
 	protected function _postValidation()
@@ -480,6 +503,8 @@ class Chippin extends PaymentModule {
 		if (!$this->active) {
 	        return null;
 	    }
+
+	    $this->context->controller->addCSS($this->_path.'/views/css/admin.css');
 	}
 
 	public function getChippinMerchantSecret()
