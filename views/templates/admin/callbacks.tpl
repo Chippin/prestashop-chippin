@@ -2,7 +2,7 @@
 <div class="panel">
 
     <div class="panel-heading">
-        <img src="/modules/chippin/logo_1.png" alt="Chippin Credentials"> Chippin Callback URLs
+        <img src="/modules/chippin/logo_1.png" alt="Chippin"> Chippin Callback URLs
     </div>
 
      <div class="form-wrapper">
