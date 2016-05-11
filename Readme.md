@@ -7,7 +7,7 @@ Chippin is a payment gateway to allow friends and family to make group purchases
 
 ### Installation
 To use this repository, a merchant should first;
- - Download the repositiry and unzip within the `modules` directory
+ - Download the repository and unzip within the `modules` directory
  - Rename the directory to `chippin`
 
 Then in the admin-panel (back-office);
