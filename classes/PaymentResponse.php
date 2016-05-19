@@ -92,7 +92,11 @@ class PaymentResponseChippin
      */
     public function setAction($action)
     {
-        $this->action = $action;
+        if($action == "timed_out") {
+            $this->action = "timedOut";
+        } else{
+            $this->action = $action;
+        }
     }
 
     /**
@@ -154,7 +158,7 @@ class PaymentResponseChippin
     /**
      * This method sets the PaymentResponseChippin object parameters with the Post values
      */
-    public function getPostData()
+    public function setPostData()
     {
         $this->setMerchantOrderId(Tools::getValue('merchant_order_id'));
         $this->setHmac(Tools::getValue('hmac'));
