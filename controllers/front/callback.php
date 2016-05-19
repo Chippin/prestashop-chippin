@@ -104,18 +104,34 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                     return $this->setTemplate('contributed.tpl');
                 }
 
-            } elseif ($payment_response->getAction() === "cancelled" || $payment_response->getAction() === "failed" || $payment_response->getAction() === "rejected" || $payment_response->getAction() === "timed_out") {
+            } elseif ($payment_response->getAction() === "failed" || $payment_response->getAction() === "rejected" || $payment_response->getAction() === "timed_out") {
 
                 $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
                 $order = new Order($order_id);
                 $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
-
                 $order->setCurrentState(Configuration::get($action));
 
                 if($payment_response->getAction() !== "timed_out") {
                     $this->errors[] = $chippin->l('Chippin payment status: ' . $payment_response->getAction() . '. Please contact the store owner for more information');
                     return $this->setTemplate('error.tpl');
                 }
+
+            } elseif ($payment_response->getAction() === "cancelled") {
+                
+                // only if there is an order with that merchant id - then update the status
+                if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
+                    $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                    $order = new Order($order_id);
+                    $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
+                    $order->setCurrentState(Configuration::get($action));
+                }
+
+                // redirect to order page
+                Tools::redirectLink(_PS_BASE_URL_.'/order.php?step=1');
+                               
+            }  else {
+                $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
+                return $this->setTemplate('error.tpl');
             }
 
         } else {
