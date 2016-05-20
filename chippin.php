@@ -307,6 +307,11 @@ class Chippin extends PaymentModule {
 		return (int) ($price * 100);
 	}
 
+	public function hookDisplayHeader()
+	{
+		$this->context->controller->addCSS($this->_path.'/views/css/front.css');
+	}
+
 	/**
 	 * show module on payment step
 	 *
