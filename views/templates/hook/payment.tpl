@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-xs-12">
-    <div class="payment_module">
+    <div class="payment_module chippin_checkout_button">
 
       <form action="{$chippin_url|escape:'htmlall':'UTF-8'}" method="POST">
         <button type="submit" class="chippin-payment">

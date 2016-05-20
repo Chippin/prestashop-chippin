@@ -58,4 +58,13 @@ div#chippin_payment_module {
   height: 22px;
   width: 14px;
   color: #777;
+  
+}
+
+.chippin_checkout_button {
+  padding-bottom: 11px;
+}
+
+.payment-return-padding-top {
+  padding-top: 7px;
 }

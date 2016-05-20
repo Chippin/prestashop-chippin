@@ -26,13 +26,15 @@
 {if $status == 'completed'}
 	<img src="/modules/chippin/views/img/logo.png" alt="Chippin" width="150">
 
-	<h3><strong>{l s='Your Chippin with %s is complete.' sprintf=$shop_name mod='chippin'}</strong></h3>
-	<h4>{l s='Your order will be sent as soon as we receive payment.' mod='chippin'}</h4>
+	<hr>
 
-	<p>{l s='An email has been sent with this information.' mod='chippin'}</p>
+	<h4>{l s='Your Chippin with %s is complete.' sprintf=$shop_name mod='chippin'}</h4>
+	<p class="payment-return-padding-top">{l s='An email has been sent with this information.' mod='chippin'}</p>
 	<p>{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.</p>
 
-	<h3 class="page-product-heading">Order details</h3>
+	<hr>
+
+	<h4>Order details</h4>
 	<table class="table-data-sheet">
 		<tbody>
 			<tr class="odd">
