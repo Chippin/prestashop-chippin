@@ -106,10 +106,12 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
 
             } elseif ($payment_response->getAction() === "failed" || $payment_response->getAction() === "rejected" || $payment_response->getAction() === "timed_out") {
 
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
-                $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
-                $order->setCurrentState(Configuration::get($action));
+                if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
+                    $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                    $order = new Order($order_id);
+                    $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
+                    $order->setCurrentState(Configuration::get($action));
+                }
 
                 if($payment_response->getAction() !== "timed_out") {
                     $this->errors[] = $chippin->l('Chippin payment status: ' . $payment_response->getAction() . '. Please contact the store owner for more information');
