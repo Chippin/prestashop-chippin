@@ -127,7 +127,13 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                 }
 
                 // redirect to order page
-                Tools::redirectLink(_PS_BASE_URL_.'/order.php?step=1');
+
+                // if a one-page checkout is enabled
+                if(Configuration::get("PS_ORDER_PROCESS_TYPE") === "1") {
+                    Tools::redirectLink(_PS_BASE_URL_.'/quick-order?step=1');
+                } else {
+                    Tools::redirectLink(_PS_BASE_URL_.'/order?step=1');    
+                }  
                                
             }  else {
                 $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
