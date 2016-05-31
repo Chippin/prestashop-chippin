@@ -410,7 +410,7 @@ class Chippin extends PaymentModule {
 	 */
 	public function getCheckoutUrl()
 	{
-		if ($this->getConfig('SANDBOX')) {
+		if ($this->getConfig('SANDBOX') === "1") {
 			return self::SANDBOX_CHECKOUT_URL;
 		}
 
@@ -419,7 +419,7 @@ class Chippin extends PaymentModule {
 
 	public function getChippinAdminUrl()
 	{
-		if ($this->getConfig('SANDBOX')) {
+		if ($this->getConfig('SANDBOX') === "1") {
 			return self::SANDBOX_CHIPPIN_ADMIN_URL;
 		}
 

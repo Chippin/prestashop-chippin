@@ -106,10 +106,12 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
 
             } elseif ($payment_response->getAction() === "failed" || $payment_response->getAction() === "rejected" || $payment_response->getAction() === "timed_out") {
 
-                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                $order = new Order($order_id);
-                $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
-                $order->setCurrentState(Configuration::get($action));
+                if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
+                    $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                    $order = new Order($order_id);
+                    $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
+                    $order->setCurrentState(Configuration::get($action));
+                }
 
                 if($payment_response->getAction() !== "timed_out") {
                     $this->errors[] = $chippin->l('Chippin payment status: ' . $payment_response->getAction() . '. Please contact the store owner for more information');
@@ -127,7 +129,13 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                 }
 
                 // redirect to order page
-                Tools::redirectLink(_PS_BASE_URL_.'/order.php?step=1');
+
+                // if a one-page checkout is enabled
+                if(Configuration::get("PS_ORDER_PROCESS_TYPE") === "1") {
+                    Tools::redirectLink(_PS_BASE_URL_.'/quick-order?step=1');
+                } else {
+                    Tools::redirectLink(_PS_BASE_URL_.'/order?step=1');    
+                }  
                                
             }  else {
                 $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
