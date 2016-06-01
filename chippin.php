@@ -128,7 +128,7 @@ class Chippin extends PaymentModule {
 	public function install()
 	{
 		if (Shop::isFeatureActive()) {
-    		Shop::setContext(Shop::CONTEXT_ALL);
+			Shop::setContext(Shop::CONTEXT_ALL);
 		}
 
 		// set up configuration params in configuration table
@@ -171,13 +171,13 @@ class Chippin extends PaymentModule {
 
 			$array = array_merge($this->os_statuses, $this->os_payment_green_statuses, $this->os_payment_red_statuses);
 
-	        foreach (array_keys($array) as $key => $value) {
-	            Configuration::deleteByName($value);  
-	        }
+			foreach (array_keys($array) as $key => $value) {
+				Configuration::deleteByName($value);  
+			}
 
-	        foreach ($this->module_params as $param => $value) {
-	        	Configuration::deleteByName(self::PREFIX.$param);
-	        }
+			foreach ($this->module_params as $param => $value) {
+				Configuration::deleteByName(self::PREFIX.$param);
+			}
 
 			Configuration::deleteByName('CHIPPIN_SUBMITUPDATE');
 			Configuration::deleteByName('CHIPPIN_TAB');
@@ -496,11 +496,10 @@ class Chippin extends PaymentModule {
 	protected function postProcess()
 	{
 		if (Shop::isFeatureActive()) {
-    		Shop::setContext(Shop::CONTEXT_ALL);
+			Shop::setContext(Shop::CONTEXT_ALL);
 		}
-		
-		if (Tools::isSubmit('submitUpdate'))
-		{
+
+		if (Tools::isSubmit('submitUpdate')) {
 			$this->_postValidation();
 
 			if (!count($this->_postErrors)) {
