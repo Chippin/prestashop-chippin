@@ -127,6 +127,10 @@ class Chippin extends PaymentModule {
 	 */
 	public function install()
 	{
+		if (Shop::isFeatureActive()) {
+			Shop::setContext(Shop::CONTEXT_ALL);
+		}
+
 		// set up configuration params in configuration table
 		foreach ($this->module_params as $param => $value) {
 			if (!self::setConfig($param, $value)) {
@@ -164,6 +168,23 @@ class Chippin extends PaymentModule {
 					return false;
 				}
 			}
+
+			$array = array_merge($this->os_statuses, $this->os_payment_green_statuses, $this->os_payment_red_statuses);
+
+			foreach (array_keys($array) as $key => $value) {
+				Configuration::deleteByName($value);  
+			}
+
+			foreach ($this->module_params as $param => $value) {
+				Configuration::deleteByName(self::PREFIX.$param);
+			}
+
+			Configuration::deleteByName('CHIPPIN_SUBMITUPDATE');
+			Configuration::deleteByName('CHIPPIN_TAB');
+			Configuration::deleteByName('CONF_CHIPPIN_FIXED');
+			Configuration::deleteByName('CONF_CHIPPIN_VAR');
+			Configuration::deleteByName('CONF_CHIPPIN_FIXED_FOREIGN');
+			Configuration::deleteByName('CONF_CHIPPIN_VAR_FOREIGN');
 		}
 
 		return true;
@@ -474,8 +495,11 @@ class Chippin extends PaymentModule {
 	 */
 	protected function postProcess()
 	{
-		if (Tools::isSubmit('submitUpdate'))
-		{
+		if (Shop::isFeatureActive()) {
+			Shop::setContext(Shop::CONTEXT_ALL);
+		}
+
+		if (Tools::isSubmit('submitUpdate')) {
 			$this->_postValidation();
 
 			if (!count($this->_postErrors)) {
