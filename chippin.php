@@ -176,7 +176,7 @@ class Chippin extends PaymentModule {
 	        }
 
 	        foreach ($this->module_params as $param => $value) {
-	        	Configuration::deleteByName(self::PREFIX.$value);
+	        	Configuration::deleteByName(self::PREFIX.$param);
 	        }
 
 			Configuration::deleteByName('CHIPPIN_SUBMITUPDATE');
