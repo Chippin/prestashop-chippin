@@ -99,6 +99,7 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                         'products' => $cart->getProducts(),
                     ));
 
+                    $this->addCSS(_THEME_CSS_DIR_.'contributed.css');
                     $this->addCSS(_THEME_CSS_DIR_.'product_list.css');
 
                     return $this->setTemplate('contributed.tpl');
