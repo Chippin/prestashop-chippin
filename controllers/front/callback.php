@@ -82,10 +82,14 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                     );
 
                 } elseif ($payment_response->getAction() === "completed") {
-
-                    $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
-                    $order = new Order($order_id);
-                    $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
+                    
+                    if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
+                        $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                        $order = new Order($order_id);
+                    } else {
+                        $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
+                        return $this->setTemplate('error.tpl');
+                    }
 
                     Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$order->id.'&key='.$customer->secure_key);
 
@@ -137,7 +141,13 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                 } else {
                     Tools::redirectLink(_PS_BASE_URL_.'/order?step=1');    
                 }  
-                               
+
+            } elseif ($payment_response->getAction() === "paid") {
+
+                $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
+                $order = new Order($order_id);
+                $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
+
             }  else {
                 $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
                 return $this->setTemplate('error.tpl');
