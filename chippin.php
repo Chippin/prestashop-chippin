@@ -77,7 +77,6 @@ class Chippin extends PaymentModule {
 		'CP_OS_PAYMENT_PAID' => 'Chippin successfully paid',
 	);
 
-
 	/**
 	 * Chippin error status
 	 *
