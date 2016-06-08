@@ -55,7 +55,7 @@ class Chippin extends PaymentModule {
 	 *
 	 * @var array
 	 */
-	private $os_statuses = array(
+	private $os_payment_initiated_status = array(
 		'CP_OS_PAYMENT_INITIATED' => 'Chippin initiated',
 	);
 
@@ -64,7 +64,7 @@ class Chippin extends PaymentModule {
 	 *
 	 * @var array
 	 */
-	private $os_payment_green_statuses = array(
+	private $os_payment_completed_status = array(
 		'CP_OS_PAYMENT_COMPLETED' => 'Chippin completed',
 	);
 
@@ -83,7 +83,7 @@ class Chippin extends PaymentModule {
 	 *
 	 * @var array
 	 */
-	private $os_payment_red_statuses = array(
+	private $os_payment_error_statuses = array(
 		'CP_OS_PAYMENT_FAILED' => 'Chippin failed',
 		'CP_OS_PAYMENT_TIMED_OUT' => 'Chippin timed-out',
 		'CP_OS_PAYMENT_CANCELLED' => 'Chippin cancelled',
@@ -155,10 +155,10 @@ class Chippin extends PaymentModule {
 				}
 			}
 
-			$this->createChippinPaymentStatus($this->os_statuses, '#3333FF', '', false, false, '', false);
-			$this->createChippinPaymentStatus($this->os_payment_green_statuses, '#32cd32', 'payment', true, true, true, true);
-			$this->createChippinPaymentStatus($this->os_payment_red_statuses, '#ec2e15', 'payment_error', false, true, false, true);
+			$this->createChippinPaymentStatus($this->os_payment_initiated_status, '#3333FF', '', false, false, false, true);
+			$this->createChippinPaymentStatus($this->os_payment_completed_status, '#3333FF', '', false,  false, false, true);
 			$this->createChippinPaymentStatus($this->os_payment_paid_status, '#32cd32', 'payment', true,   true, true, true);
+			$this->createChippinPaymentStatus($this->os_payment_error_statuses, '#ec2e15', 'payment_error', false, true, false, true);
 
 			return true;
 		}
