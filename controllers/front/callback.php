@@ -86,6 +86,7 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                     if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
                         $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
                         $order = new Order($order_id);
+                        $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
                     } else {
                         $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
                         return $this->setTemplate('error.tpl');
@@ -131,6 +132,9 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                     $order = new Order($order_id);
                     $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
                     $order->setCurrentState(Configuration::get($action));
+                } else {
+                    $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
+                    return $this->setTemplate('error.tpl');
                 }
 
                 // redirect to order page
