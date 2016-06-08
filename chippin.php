@@ -27,6 +27,7 @@ class Chippin extends PaymentModule {
 	private $chippinMerchantId;
 	private $chippinMerchantSecret;
 	private $chippinDuration;
+	private $chippinGracePeriod;
 	private $orderCurrency;
 
 	private static $locally_supported = array(
@@ -100,6 +101,7 @@ class Chippin extends PaymentModule {
 		'MERCHANT_ID' => '',
 		'MERCHANT_SECRET' => '',
 		'DURATION' => 24,
+		'GRACE_PERIOD' => 0,
 	);
 
 	/**
@@ -126,6 +128,7 @@ class Chippin extends PaymentModule {
 		$this->chippinMerchantId = $this->getConfig('MERCHANT_ID');
 		$this->chippinMerchantSecret = $this->getConfig('MERCHANT_SECRET');
 		$this->chippinDuration = Configuration::get('DURATION');
+		$this->chippinGracePeriod = Configuration::get('GRACE_PERIOD');
 
 		$this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
 	}
@@ -305,6 +308,13 @@ class Chippin extends PaymentModule {
 					'name' => 'duration',
 					'prefix' => '<i class="icon icon-tag"></i>'
 				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Grace period (in hours)'),
+					'name' => 'grace_period',
+					'prefix' => '<i class="icon icon-tag"></i>',
+					'desc' => $this->l('Duration + grace period should be less than 7 days (168 hours).')
+				),
 			),
 		);
 
@@ -376,6 +386,7 @@ class Chippin extends PaymentModule {
 			'products' => $products,
 			'chippin_merchant_id' => $this->chippinMerchantId,
 			'chippin_duration' => $this->getConfig('DURATION'),
+			'chippin_grace_period' => $this->getConfig('GRACE_PERIOD'),
 			'cart_id' => $this->context->cart->id,
 			'currency' => $this->getOrderCurrency(),
 		));
@@ -497,6 +508,11 @@ class Chippin extends PaymentModule {
 		{
 			if ((int) Tools::getValue('duration') > 72) {
 				$this->_postErrors[] = $this->l('Duration maximum is 72 hours.');
+			}
+
+			$total_duration = (int) Tools::getValue('duration') + (int) Tools::getValue('grace_period');
+			if($total_duration > 168) {
+				$this->_postErrors[] = $this->l('Duration + grace period should be less than 7 days (168 hours).');
 			}
 		}
 	}
