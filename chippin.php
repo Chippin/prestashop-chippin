@@ -51,7 +51,7 @@ class Chippin extends PaymentModule {
 	);
 
 	/**
-	 * Chippin waiting status
+	 * Chippin initiated status
 	 *
 	 * @var array
 	 */
@@ -60,7 +60,7 @@ class Chippin extends PaymentModule {
 	);
 
 	/**
-	 * Status for orders with accepted payment
+	 * Chippin completed status
 	 *
 	 * @var array
 	 */
@@ -69,7 +69,7 @@ class Chippin extends PaymentModule {
 	);
 
 	/**
-	 * Chippin waiting status
+	 * Chippin paid status
 	 *
 	 * @var array
 	 */
@@ -78,7 +78,7 @@ class Chippin extends PaymentModule {
 	);
 
 	/**
-	 * Chippin error status
+	 * Chippin error statuses
 	 *
 	 * @var array
 	 */
