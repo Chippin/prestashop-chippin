@@ -22,6 +22,11 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label col-lg-3 align-right">paid:</label>
+            {$chippin_base_return_url}paid
+        </div>
+
+        <div class="form-group">
             <label class="control-label col-lg-3 align-right">contributed:</label>
             {$chippin_base_return_url}contributed
         </div>

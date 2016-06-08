@@ -29,7 +29,7 @@
 	<hr>
 
 	<h4>{l s='Your Chippin with %s has been completed.' sprintf=$shop_name mod='chippin'}</h4>
-	<p class="payment-return-padding-top">{l s='Thank you for completing your chippin, we will email you order completion details shortly.' mod='chippin'}</p>
+	<p class="payment-return-padding-top">{l s='Thank you for completing your chippin, we will email your order completion details shortly.' mod='chippin'}</p>
 	<p>{l s='If you have questions, comments or concerns, please contact our' mod='chippin'} <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='expert customer support team' mod='chippin'}</a>.</p>
 
 	<hr>
