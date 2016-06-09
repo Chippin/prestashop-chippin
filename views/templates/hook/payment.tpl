@@ -11,6 +11,7 @@
         <input type="hidden" name="merchant_id" value="{$chippin_merchant_id}">
         <input type="hidden" name="merchant_order_id" value="{$cart_id}">
         <input type="hidden" name="duration" value="{$chippin_duration}">
+        <input type="hidden" name="grace_period" value="{$chippin_grace_period}">
         <input type="hidden" name="currency_code" value="{$currency}">
         <input type="hidden" name="hmac" value="{$chippin_hmac}">
         <input type="hidden" name="total_amount" value="{$price_in_pence}">

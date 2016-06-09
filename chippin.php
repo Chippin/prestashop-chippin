@@ -27,6 +27,7 @@ class Chippin extends PaymentModule {
 	private $chippinMerchantId;
 	private $chippinMerchantSecret;
 	private $chippinDuration;
+	private $chippinGracePeriod;
 	private $orderCurrency;
 
 	private static $locally_supported = array(
@@ -51,29 +52,38 @@ class Chippin extends PaymentModule {
 	);
 
 	/**
-	 * Chippin waiting status
+	 * Chippin initiated status
 	 *
 	 * @var array
 	 */
-	private $os_statuses = array(
+	private $os_payment_initiated_status = array(
 		'CP_OS_PAYMENT_INITIATED' => 'Chippin initiated',
 	);
 
 	/**
-	 * Status for orders with accepted payment
+	 * Chippin completed status
 	 *
 	 * @var array
 	 */
-	private $os_payment_green_statuses = array(
+	private $os_payment_completed_status = array(
 		'CP_OS_PAYMENT_COMPLETED' => 'Chippin completed',
 	);
 
 	/**
-	 * Chippin error status
+	 * Chippin paid status
 	 *
 	 * @var array
 	 */
-	private $os_payment_red_statuses = array(
+	private $os_payment_paid_status = array(
+		'CP_OS_PAYMENT_PAID' => 'Chippin successfully paid',
+	);
+
+	/**
+	 * Chippin error statuses
+	 *
+	 * @var array
+	 */
+	private $os_payment_error_statuses = array(
 		'CP_OS_PAYMENT_FAILED' => 'Chippin failed',
 		'CP_OS_PAYMENT_TIMED_OUT' => 'Chippin timed-out',
 		'CP_OS_PAYMENT_CANCELLED' => 'Chippin cancelled',
@@ -90,6 +100,7 @@ class Chippin extends PaymentModule {
 		'MERCHANT_ID' => '',
 		'MERCHANT_SECRET' => '',
 		'DURATION' => 24,
+		'GRACE_PERIOD' => 0,
 	);
 
 	/**
@@ -116,6 +127,7 @@ class Chippin extends PaymentModule {
 		$this->chippinMerchantId = $this->getConfig('MERCHANT_ID');
 		$this->chippinMerchantSecret = $this->getConfig('MERCHANT_SECRET');
 		$this->chippinDuration = Configuration::get('DURATION');
+		$this->chippinGracePeriod = Configuration::get('GRACE_PERIOD');
 
 		$this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
 	}
@@ -145,9 +157,10 @@ class Chippin extends PaymentModule {
 				}
 			}
 
-			$this->createChippinPaymentStatus($this->os_statuses, '#3333FF', '', false, false, '', false);
-			$this->createChippinPaymentStatus($this->os_payment_green_statuses, '#32cd32', 'payment', true, true, true, true);
-			$this->createChippinPaymentStatus($this->os_payment_red_statuses, '#ec2e15', 'payment_error', false, true, false, true);
+			$this->createChippinPaymentStatus($this->os_payment_initiated_status, '#3333FF', '', false, false, false, true);
+			$this->createChippinPaymentStatus($this->os_payment_completed_status, '#3333FF', '', false,  false, false, true);
+			$this->createChippinPaymentStatus($this->os_payment_paid_status, '#32cd32', 'payment', true,   true, true, true);
+			$this->createChippinPaymentStatus($this->os_payment_error_statuses, '#ec2e15', 'payment_error', false, true, false, true);
 
 			return true;
 		}
@@ -294,6 +307,13 @@ class Chippin extends PaymentModule {
 					'name' => 'duration',
 					'prefix' => '<i class="icon icon-tag"></i>'
 				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Grace period (in hours)'),
+					'name' => 'grace_period',
+					'prefix' => '<i class="icon icon-tag"></i>',
+					'desc' => $this->l('Duration + grace period must be less than 7 days (168 hours).')
+				),
 			),
 		);
 
@@ -365,6 +385,7 @@ class Chippin extends PaymentModule {
 			'products' => $products,
 			'chippin_merchant_id' => $this->chippinMerchantId,
 			'chippin_duration' => $this->getConfig('DURATION'),
+			'chippin_grace_period' => $this->getConfig('GRACE_PERIOD'),
 			'cart_id' => $this->context->cart->id,
 			'currency' => $this->getOrderCurrency(),
 		));
@@ -400,6 +421,15 @@ class Chippin extends PaymentModule {
 			$this->smarty->assign(array(
 				'total_to_pay' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
 				'status' => 'completed',
+				'id_order' => $params['objOrder']->id
+			));
+			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference)) {
+				$this->smarty->assign('reference', $params['objOrder']->reference);
+			}
+		} elseif (in_array($state, array(Configuration::get('CP_OS_PAYMENT_PAID')))) {
+			
+				'total_paid' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
+				'status' => 'paid',
 				'id_order' => $params['objOrder']->id
 			));
 			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference)) {
@@ -486,6 +516,11 @@ class Chippin extends PaymentModule {
 		{
 			if ((int) Tools::getValue('duration') > 72) {
 				$this->_postErrors[] = $this->l('Duration maximum is 72 hours.');
+			}
+
+			$total_duration = (int) Tools::getValue('duration') + (int) Tools::getValue('grace_period');
+			if($total_duration > 168) {
+				$this->_postErrors[] = $this->l('Duration + grace period must be less than 7 days (168 hours).');
 			}
 		}
 	}
