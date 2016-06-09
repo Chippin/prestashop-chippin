@@ -1,7 +1,4 @@
 <?php
-/**
- * NOTICE OF LICENCE
- */
 
 if (!defined('_PS_VERSION_'))
 	exit;
