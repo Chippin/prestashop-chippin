@@ -300,7 +300,7 @@ class Chippin extends PaymentModule {
 					'name' => 'merchant_secret',
 					'size' => 32,
 					'prefix' => '<i class="icon icon-tag"></i>',
-					'desc' => $this->l('This string must be kept secret and is used for signing requests and validating responses.')
+					'desc' => $this->l('This string should be kept secret and is used for signing requests and validating responses.')
 				),
 				array(
 					'type' => 'text',
@@ -512,7 +512,7 @@ class Chippin extends PaymentModule {
 
 			$total_duration = (int) Tools::getValue('duration') + (int) Tools::getValue('grace_period');
 			if($total_duration > 168) {
-				$this->_postErrors[] = $this->l('Duration + grace period should be less than 7 days (168 hours).');
+				$this->_postErrors[] = $this->l('Duration + grace period must be less than 7 days (168 hours).');
 			}
 		}
 	}
