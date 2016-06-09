@@ -54,6 +54,6 @@ class ChippinValidator
 
     public static function generateHash($price_in_pence, $orderCurrency, $cartId)
     {
-        return hash_hmac('sha256', Chippin::getConfig('MERCHANT_ID') . $cartId . $price_in_pence . Chippin::getConfig('DURATION') . $orderCurrency, Chippin::getConfig('MERCHANT_SECRET'));
+        return hash_hmac('sha256', Chippin::getConfig('MERCHANT_ID') . $cartId . $price_in_pence . Chippin::getConfig('DURATION') . Chippin::getConfig('GRACE_PERIOD') . $orderCurrency, Chippin::getConfig('MERCHANT_SECRET'));
     }
 }
