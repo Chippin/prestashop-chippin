@@ -86,7 +86,9 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                     if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
                         $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
                         $order = new Order($order_id);
-                        $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
+                        if ($order->getCurrentState() == Configuration::get('CP_OS_PAYMENT_INITIATED')) {
+                            $order->setCurrentState(Configuration::get('CP_OS_PAYMENT_COMPLETED'));
+                        }
                     } else {
                         $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
                         return $this->setTemplate('error.tpl');
@@ -147,7 +149,6 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                 }  
 
             } elseif ($payment_response->getAction() === "paid") {
-
                 if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
                     $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
                     $order = new Order($order_id);
@@ -167,5 +168,4 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
             return $this->setTemplate('error.tpl');
         }
     }
-
 }

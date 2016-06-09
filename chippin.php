@@ -415,6 +415,15 @@ class Chippin extends PaymentModule {
 			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference)) {
 				$this->smarty->assign('reference', $params['objOrder']->reference);
 			}
+		} elseif (in_array($state, array(Configuration::get('CP_OS_PAYMENT_PAID')))) {
+			
+				'total_paid' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
+				'status' => 'paid',
+				'id_order' => $params['objOrder']->id
+			));
+			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference)) {
+				$this->smarty->assign('reference', $params['objOrder']->reference);
+			}
 		} else {
 			$this->smarty->assign('status', 'failed');
 		}
