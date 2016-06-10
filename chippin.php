@@ -28,13 +28,6 @@ class Chippin extends PaymentModule {
 	private $chippinMerchantSecret;
 	private $chippinDuration;
 	private $chippinGracePeriod;
-	private $orderCurrency;
-
-	private static $locally_supported = array(
-		'USD',
-		'EUR',
-		'GBP'
-	);
 
 	/**
 	 * hooks uses by module
@@ -344,8 +337,9 @@ class Chippin extends PaymentModule {
 		}
 	}
 
-	private function price_in_pence($price) {
-		return (int) ($price * 100);
+	private function convertPriceIntoPence($price) {
+		$currency = Currency::getCurrency($this->context->cart->id_currency);
+		return (int) ($currency['decimals']) ? ($price * 100) : (round($price) * 100);
 	}
 
 	public function hookDisplayHeader()
@@ -365,29 +359,40 @@ class Chippin extends PaymentModule {
 			return;
 		}
 
-		$price_in_pence = $this->price_in_pence(
-			$this->context->cart->getOrderTotal(true, Cart::BOTH)
+		$currency = Currency::getCurrency($this->context->cart->id_currency);
+
+		$calculatedShippingAmount = $this->convertPriceIntoPence(
+			$this->context->cart->getOrderTotal(true, Cart::ONLY_SHIPPING)
 		);
 
 		$products = $this->context->cart->getProducts();
 
+		$calculatedProductsAmount = 0;
+
 		foreach ($products as $key => $value) {
-			$products[$key]['price_in_pence'] = $this->price_in_pence($value['total_wt']);
+			$products[$key]['price_in_pence'] = $this->convertPriceIntoPence(
+				$value['total_wt']
+			);
+			$calculatedProductsAmount += $products[$key]['price_in_pence'];
 		}
 
-		$this->setOrderCurrency();
+		$calculatedTotal = $calculatedShippingAmount + $calculatedProductsAmount;
 
 		$this->smarty->assign(array(
-			'chippin_hmac' => ChippinValidator::generateHash($price_in_pence, $this->getOrderCurrency(), $this->context->cart->id),
+			'chippin_hmac' => ChippinValidator::generateHash(
+				$calculatedTotal,
+				$currency['iso_code'],
+				$this->context->cart->id
+			),
 			'chippin_url' => $this->getCheckoutUrl(),
 			'chippin_path' => $this->_path,
-			'price_in_pence' => $price_in_pence,
+			'price_in_pence' => $calculatedTotal,
 			'products' => $products,
 			'chippin_merchant_id' => $this->chippinMerchantId,
 			'chippin_duration' => $this->getConfig('DURATION'),
 			'chippin_grace_period' => $this->getConfig('GRACE_PERIOD'),
 			'cart_id' => $this->context->cart->id,
-			'currency' => $this->getOrderCurrency(),
+			'currency' => $currency['iso_code'],
 		));
 
 		$this->context->controller->addCSS(($this->_path).'views/css/front.css', 'all');
@@ -590,22 +595,6 @@ class Chippin extends PaymentModule {
 
 		$file = dirname(__FILE__).DS.$file;
 		file_put_contents($file, $string.' - '.date('Y-m-d H:i:s')."\n", FILE_APPEND | LOCK_EX);
-	}
-
-	private function setOrderCurrency()
-	{
-		$currencies = Currency::getCurrencies();
-
-		foreach ($currencies as $key => $currency) {
-			if ($currency['id_currency'] == $this->context->cart->id_currency) {
-				$this->orderCurrency = $currency['iso_code'];
-			}
-		}
-	}
-
-	private function getOrderCurrency()
-	{
-		return $this->orderCurrency;
 	}
 
 	/**
