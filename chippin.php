@@ -150,9 +150,9 @@ class Chippin extends PaymentModule {
 				}
 			}
 
-			$this->createChippinPaymentStatus($this->os_payment_initiated_status, '#3333FF', '', false, false, false, true);
-			$this->createChippinPaymentStatus($this->os_payment_completed_status, '#3333FF', '', false,  false, false, true);
-			$this->createChippinPaymentStatus($this->os_payment_paid_status, '#32cd32', 'payment', true,   true, true, true);
+			$this->createChippinPaymentStatus($this->os_payment_initiated_status, '#3333FF', '', false, false, false, false);
+			$this->createChippinPaymentStatus($this->os_payment_completed_status, '#3333FF', '', false, false, false, true);
+			$this->createChippinPaymentStatus($this->os_payment_paid_status, '#32cd32', 'payment', true, true, true, true);
 			$this->createChippinPaymentStatus($this->os_payment_error_statuses, '#ec2e15', 'payment_error', false, true, false, true);
 
 			return true;
