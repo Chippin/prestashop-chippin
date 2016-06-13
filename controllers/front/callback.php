@@ -108,8 +108,7 @@ class ChippinCallbackModuleFrontController extends ModuleFrontController
                 if(Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()))) {
                     $order_id = Order::getOrderByCartId((int) ($payment_response->getMerchantOrderId()));
                     $order = new Order($order_id);
-                    $action = strtoupper('CP_OS_PAYMENT_'.$payment_response->getAction());
-                    $order->setCurrentState(Configuration::get($action));
+                    $order->setCurrentState(Configuration::get('PS_OS_CANCELED'));
                 } else {
                     $this->errors[] = $chippin->l('An error occured. Please contact the store owner for more information');
                     return $this->setTemplate('error.tpl');
