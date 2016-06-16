@@ -14,7 +14,8 @@ Then in the admin-panel (back-office);
  - Navigate to **Modules and Services** -> **Payments**
  - Select **View all available payment solutions**
  - Click **Install** next to the Chippin payment module
- - Provide the merchants Chippin ID and Secret (which can be found at http://chippin.co.uk/admin)
+ - Provide the merchant's Chippin ID and Secret (which can be found at https://chippin.co.uk/admin)
+ - Set the Duration and Grace Period for the merchant's Chippin
 
 In Chippin;
  - Provide Chippin with the URLs supplied to you in the PrestaShop back-office (they are under the heading **CHIPPIN CALLBACK URLS**)
@@ -24,12 +25,12 @@ Back in the PrestaShop back-office;
 
 ### Payment Statuses
 
-There are currently 6 different payment statuses;
+The Prestashop payment statuses specific to Chippin are;
 - Chippin initiated
 - Chippin completed
-- Chippin failed
-- Chippin timed-out
+- Chippin successfully paid
 - Chippin cancelled
 - Chippin rejected
+- Chippin timed-out
 
-These statuses are based on the callbacks that are fired from Chippin at certain points through a Chippin process. A merchant can view the status of a Chippin at any point by going to **Orders** in the PrestaShop back-office.
+These statuses are based on the callbacks that are fired from Chippin at certain points through a Chippin process. A merchant can view the status of a Chippin payment at any point by going to **Orders** in the PrestaShop back-office.
