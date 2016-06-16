@@ -15,10 +15,10 @@ require_once _PS_MODULE_DIR_.'chippin/includer.php';
 class Chippin extends PaymentModule {
 
 	const PREFIX = 'CHIPPIN_';
-	const SANDBOX_CHECKOUT_URL = 'http://staging.chippin.co.uk/sandbox/new';
-	const CHECKOUT_URL = 'http://staging.chippin.co.uk/new';
-	const SANDBOX_CHIPPIN_ADMIN_URL = 'http://staging.chippin.co.uk/admin';
-	const CHIPPIN_ADMIN_URL = 'http://staging.chippin.co.uk/admin';
+	const SANDBOX_CHECKOUT_URL = 'https://chippin.co.uk/sandbox/new';
+	const CHECKOUT_URL = 'https://chippin.co.uk/new';
+	const SANDBOX_CHIPPIN_ADMIN_URL = 'https://chippin.co.uk/admin';
+	const CHIPPIN_ADMIN_URL = 'https://chippin.co.uk/admin';
 	const LOG_FILE = 'log/chippin.log';
 
 	protected $_postErrors = array();
