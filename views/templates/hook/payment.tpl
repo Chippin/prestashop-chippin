@@ -4,8 +4,8 @@
 
       <form action="{$chippin_url|escape:'htmlall':'UTF-8'}" method="POST">
         <button type="submit" class="chippin-payment">
-          {l s='Pay with Chippin' mod='chippin'}
-          <span>({l s='split the cost with your friends and family' mod='chippin'})</span>
+          {l s='Split the cost' mod='chippin'}
+          <span>({l s='Pay with Chippin to split the cost with your friends and family' mod='chippin'})</span>
         </button>
 
         <input type="hidden" name="merchant_id" value="{$chippin_merchant_id}">
